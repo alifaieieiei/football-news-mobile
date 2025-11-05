@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:football_news/widgets/left_drawer.dart';
-import 'package:football_news/newslist_form.dart'; // ✅ Import your form page
+import 'package:football_news/widgets/news_card.dart';
 
 class MyHomePage extends StatelessWidget {
   MyHomePage({super.key});
@@ -28,12 +28,13 @@ class MyHomePage extends StatelessWidget {
         ),
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
-      drawer: const LeftDrawer(), // ✅ Added the drawer here
+      drawer: const LeftDrawer(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            // Top info cards
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -42,7 +43,9 @@ class MyHomePage extends StatelessWidget {
                 InfoCard(title: 'Class', content: kelas),
               ],
             ),
+
             const SizedBox(height: 16.0),
+
             Center(
               child: Column(
                 children: [
@@ -56,6 +59,8 @@ class MyHomePage extends StatelessWidget {
                       ),
                     ),
                   ),
+
+                  // Grid of buttons
                   GridView.count(
                     primary: true,
                     padding: const EdgeInsets.all(20),
@@ -64,7 +69,10 @@ class MyHomePage extends StatelessWidget {
                     crossAxisCount: 3,
                     shrinkWrap: true,
                     children: items.map((ItemHomepage item) {
-                      return ItemCard(item);
+                      return NewsItem(
+                        name: item.name,
+                        icon: item.icon,
+                      );
                     }).toList(),
                   ),
                 ],
@@ -110,59 +118,4 @@ class ItemHomepage {
   final IconData icon;
 
   ItemHomepage(this.name, this.icon);
-}
-
-class ItemCard extends StatelessWidget {
-  final ItemHomepage item;
-
-  const ItemCard(this.item, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).colorScheme.secondary,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: () {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(content: Text("You pressed the ${item.name} button!")),
-            );
-
-          if (item.name == "Add News") {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const NewsFormPage()),
-            );
-          } else if (item.name == "See Football News") {
-            // For now, no page yet — you can add later
-          } else if (item.name == "Logout") {
-            // You can add logout logic here later
-          }
-        },
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  item.icon,
-                  color: Colors.white,
-                  size: 30.0,
-                ),
-                const Padding(padding: EdgeInsets.all(3)),
-                Text(
-                  item.name,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
