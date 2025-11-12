@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:football_news/screens/menu.dart';
 
 class NewsFormPage extends StatefulWidget {
   const NewsFormPage({super.key});
@@ -19,6 +23,8 @@ class _NewsFormPageState extends State<NewsFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>(); // Add CookieRequest
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -66,39 +72,41 @@ class _NewsFormPageState extends State<NewsFormPage> {
               const SizedBox(height: 24),
               ElevatedButton(
                 style: ButtonStyle(
-                  backgroundColor:
-                  WidgetStateProperty.all(Colors.indigo),
+                  backgroundColor: MaterialStateProperty.all(Colors.indigo),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: const Text('News Saved!'),
-                          content: SingleChildScrollView(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Title: $_title'),
-                                Text('Content: $_content'),
-                                Text('Category: $_category'),
-                                Text('Thumbnail: $_thumbnail'),
-                                Text('Featured: ${_isFeatured ? "Yes" : "No"}'),
-                              ],
-                            ),
-                          ),
-                          actions: [
-                            TextButton(
-                              child: const Text('OK'),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ],
-                        );
-                      },
+                    // POST request to local Django backend
+                    final response = await request.postJson(
+                      "http://localhost:8000/create-flutter/", // <-- Localhost URL
+                      jsonEncode({
+                        "title": _title,
+                        "content": _content,
+                        "thumbnail": _thumbnail,
+                        "category": _category,
+                        "is_featured": _isFeatured,
+                      }),
                     );
+
+                    if (context.mounted) {
+                      if (response['status'] == 'success') {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          content: Text("News successfully saved!"),
+                        ));
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => MyHomePage()),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(
+                          content: Text("Something went wrong, please try again."),
+                        ));
+                      }
+                    }
+
+                    // Reset form
                     _formKey.currentState!.reset();
                     setState(() {
                       _title = '';
