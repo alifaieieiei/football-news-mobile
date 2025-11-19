@@ -29,7 +29,7 @@ class NewsEntry {
     required this.createdAt,
     required this.isFeatured,
     required this.userId,
-  }); // comment
+  }); // commentt
 
   factory NewsEntry.fromJson(Map<String, dynamic> json) => NewsEntry(
     id: json["id"],
